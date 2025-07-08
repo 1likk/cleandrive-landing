@@ -76,9 +76,15 @@ function initForm() {
 
 // Отправка в Telegram
 async function sendToTelegram(formData) {
+  // Определяем URL API в зависимости от окружения
+  const isLocalhost = window.location.hostname === 'localhost';
+  const apiUrl = isLocalhost 
+    ? 'http://localhost:3000/lead' 
+    : '/api/telegram';
+  
   try {
-    // Основной способ через Python сервер
-    const response = await fetch('http://localhost:3000/lead', {
+    // Основной способ через API
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
@@ -89,7 +95,7 @@ async function sendToTelegram(formData) {
     const result = await response.json();
     if (!result.success) throw new Error(result.message);
     
-    console.log('✅ Заявка отправлена через Python сервер');
+    console.log('✅ Заявка отправлена через API');
     
   } catch (error) {
     console.log('🔄 Пробуем запасной способ...');

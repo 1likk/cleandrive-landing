@@ -1,0 +1,17 @@
+{
+  "functions": {
+    "api/telegram.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/lead",
+      "dest": "/api/telegram.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
