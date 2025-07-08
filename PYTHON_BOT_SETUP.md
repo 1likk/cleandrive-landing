@@ -1,6 +1,3 @@
-# 🤖 CleanDrive Python Telegram Bot
-
-## 🚀 Быстрый старт:
 
 ### 1. Запуск Python бота:
 ```bash
