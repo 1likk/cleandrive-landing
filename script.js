@@ -67,6 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Показываем кнопку для просмотра всех заявок
   showFormDataButton();
+  
+  // Добавляем кнопку для тестирования Telegram бота
+  showTelegramTestButton();
 });
 
 // Функция для показа уведомлений
@@ -282,8 +285,8 @@ function saveFormData(name, phone) {
 
 function sendToTelegram(formData) {
   // Конфигурация Telegram бота
-  const TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN'; // Замените на токен вашего бота
-  const TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID';   // Замените на ID вашего чата
+  const TELEGRAM_BOT_TOKEN = '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ';
+  const TELEGRAM_CHAT_ID = '7954963884'; // Попробуем с ID бота сначала
   
   const message = `🚗 Новая заявка CleanDrive!
   
@@ -293,40 +296,49 @@ function sendToTelegram(formData) {
 
 #новая_заявка #cleandrive`;
 
-  // Если токен не настроен, показываем инструкцию
-  if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN') {
-    console.log('=== ИНСТРУКЦИЯ ПО НАСТРОЙКЕ TELEGRAM ===');
-    console.log('1. Создайте бота через @BotFather');
-    console.log('2. Получите токен бота');
-    console.log('3. Замените YOUR_BOT_TOKEN в script.js');
-    console.log('4. Замените YOUR_CHAT_ID на ваш ID чата');
-    console.log('=====================================');
-    return;
-  }
-
-  const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  console.log('=== ОТПРАВКА В TELEGRAM ===');
+  console.log('Токен бота:', TELEGRAM_BOT_TOKEN);
+  console.log('Chat ID:', TELEGRAM_CHAT_ID);
+  console.log('Сообщение:', message);
   
-  fetch(telegramUrl, {
+  // Простая отправка без сложной логики
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  
+  // Показываем пользователю, что пытаемся отправить
+  showNotification('� Отправляем в Telegram...', 'success');
+  
+  fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       chat_id: TELEGRAM_CHAT_ID,
-      text: message,
-      parse_mode: 'HTML'
+      text: message
     })
   })
   .then(response => response.json())
   .then(data => {
+    console.log('=== ОТВЕТ TELEGRAM ===');
+    console.log('Статус:', data.ok ? 'OK' : 'ERROR');
+    console.log('Полный ответ:', data);
+    
     if (data.ok) {
-      console.log('✅ Сообщение отправлено в Telegram');
+      showNotification('✅ Отправлено в Telegram!', 'success');
     } else {
-      console.error('❌ Ошибка отправки в Telegram:', data);
+      showNotification('❌ Ошибка: ' + (data.description || 'Неизвестная ошибка'), 'error');
+      console.error('Ошибка Telegram:', data.description);
+      
+      // Если ошибка chat not found, показываем инструкцию
+      if (data.description && data.description.includes('chat not found')) {
+        console.log('💡 РЕШЕНИЕ: Напишите боту /start в Telegram');
+        showNotification('💡 Напишите боту /start в Telegram', 'error');
+      }
     }
   })
   .catch(error => {
-    console.error('❌ Ошибка при отправке в Telegram:', error);
+    console.error('Ошибка сети:', error);
+    showNotification('❌ Ошибка сети', 'error');
   });
 }
 
@@ -440,5 +452,127 @@ function showAllFormData() {
     if (e.target === modal) {
       modal.remove();
     }
+  });
+}
+
+// Функция для получения Chat ID
+async function getMyTelegramChatId() {
+  const TELEGRAM_BOT_TOKEN = '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ';
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
+  
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    console.log('=== TELEGRAM UPDATES ===');
+    console.log('Full response:', data);
+    
+    if (data.ok && data.result.length > 0) {
+      const lastUpdate = data.result[data.result.length - 1];
+      const chatId = lastUpdate.message?.chat?.id || lastUpdate.message?.from?.id;
+      
+      console.log('Ваш Chat ID:', chatId);
+      console.log('Замените в коде TELEGRAM_CHAT_ID на:', chatId);
+      
+      return chatId;
+    } else {
+      console.log('❌ Нет сообщений боту. Напишите боту /start в Telegram');
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Ошибка получения Chat ID:', error);
+    return null;
+  }
+}
+
+// Функция для тестирования бота
+async function testTelegramBot() {
+  const TELEGRAM_BOT_TOKEN = '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ';
+  
+  // Проверяем бота
+  const botInfoUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe`;
+  
+  try {
+    const response = await fetch(botInfoUrl);
+    const data = await response.json();
+    
+    console.log('=== ИНФОРМАЦИЯ О БОТЕ ===');
+    console.log('Bot info:', data);
+    
+    if (data.ok) {
+      console.log('✅ Бот работает:', data.result.username);
+      
+      // Получаем Chat ID
+      const chatId = await getMyTelegramChatId();
+      
+      if (chatId) {
+        // Отправляем тестовое сообщение
+        const testMessage = '🧪 Тестовое сообщение от CleanDrive!';
+        const sendUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        
+        const testResponse = await fetch(sendUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: testMessage
+          })
+        });
+        
+        const testData = await testResponse.json();
+        console.log('Test message result:', testData);
+        
+        if (testData.ok) {
+          console.log('✅ Тестовое сообщение отправлено!');
+        } else {
+          console.log('❌ Ошибка отправки тестового сообщения:', testData);
+        }
+      }
+    } else {
+      console.log('❌ Бот не работает:', data);
+    }
+  } catch (error) {
+    console.error('❌ Ошибка проверки бота:', error);
+  }
+}
+
+function showTelegramTestButton() {
+  // Создаем кнопку для тестирования Telegram
+  const testButton = document.createElement('button');
+  testButton.innerHTML = '🤖 Тест Telegram';
+  testButton.style.cssText = `
+    position: fixed;
+    bottom: 140px;
+    right: 20px;
+    padding: 10px 15px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    transition: all 0.3s ease;
+  `;
+  
+  document.body.appendChild(testButton);
+  
+  testButton.addEventListener('click', () => {
+    console.log('🚀 Запуск тестирования Telegram бота...');
+    testTelegramBot();
+  });
+  
+  // Эффект при наведении
+  testButton.addEventListener('mouseenter', () => {
+    testButton.style.transform = 'scale(1.1)';
+    testButton.style.boxShadow = '0 8px 25px rgba(0, 123, 255, 0.4)';
+  });
+  
+  testButton.addEventListener('mouseleave', () => {
+    testButton.style.transform = 'scale(1)';
+    testButton.style.boxShadow = '0 4px 15px rgba(0, 123, 255, 0.3)';
   });
 }
