@@ -16,37 +16,32 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 from aiohttp import web
 import aiohttp_cors
 
-# Настройка логирования
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# Конфигурация
 BOT_TOKEN = "7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ"
 WEBHOOK_PORT = 3001
 WEB_PORT = 3000
-ADMIN_CHAT_ID = None  # Будет установлен автоматически
+ADMIN_CHAT_ID = None  
 
 class CleanDriveBot:
     def __init__(self):
         self.bot = Bot(token=BOT_TOKEN)
         self.app = Application.builder().token(BOT_TOKEN).build()
-        self.admin_chat_id = ADMIN_CHAT_ID
+        self.admin_chat_id = 7099490320
         
-        # Добавляем обработчики команд
         self.app.add_handler(CommandHandler("start", self.start_command))
         self.app.add_handler(CommandHandler("help", self.help_command))
         self.app.add_handler(CommandHandler("stats", self.stats_command))
         self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
 
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Обработчик команды /start"""
         user = update.effective_user
         chat_id = update.effective_chat.id
         
-        # Сохраняем ID администратора
         if self.admin_chat_id is None:
             self.admin_chat_id = chat_id
             logger.info(f"Admin chat ID установлен: {chat_id}")
@@ -69,7 +64,6 @@ class CleanDriveBot:
         await update.message.reply_text(welcome_text, parse_mode='Markdown')
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Обработчик команды /help"""
         help_text = """
 🤖 Помощь по CleanDrive Bot
 
@@ -98,8 +92,6 @@ class CleanDriveBot:
         await update.message.reply_text(help_text)
 
     async def stats_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Обработчик команды /stats"""
-        # Здесь можно добавить статистику из базы данных
         stats_text = f"""
 📊 Статистика CleanDrive Bot
 
@@ -119,14 +111,12 @@ class CleanDriveBot:
         await update.message.reply_text(stats_text)
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Обработчик обычных сообщений"""
         await update.message.reply_text(
             "👋 Я бот для уведомлений о заявках CleanDrive.\n\n"
             "Используйте /help для получения справки."
         )
 
     async def send_lead_notification(self, lead_data: Dict[str, Any]):
-        """Отправка уведомления о новой заявке"""
         if not self.admin_chat_id:
             logger.error("Admin chat ID не установлен!")
             return False
@@ -156,13 +146,11 @@ class CleanDriveBot:
             logger.error(f"Ошибка отправки уведомления: {e}")
             return False
 
-# Веб-сервер для приема данных с сайта
+
 async def handle_lead(request):
-    """Обработчик POST запросов с данными заявок"""
     try:
         data = await request.json()
         
-        # Валидация данных
         required_fields = ['name', 'phone']
         for field in required_fields:
             if field not in data or not data[field].strip():
@@ -171,12 +159,10 @@ async def handle_lead(request):
                     status=400
                 )
         
-        # Добавляем метаданные
         data['timestamp'] = datetime.now().isoformat()
         data['date'] = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
         data['source'] = 'CleanDrive Website'
         
-        # Отправляем уведомление в Telegram
         bot_instance = request.app['bot']
         success = await bot_instance.send_lead_notification(data)
         
@@ -204,7 +190,6 @@ async def handle_lead(request):
         )
 
 async def handle_test(request):
-    """Тестовый endpoint"""
     return web.json_response({
         'status': 'OK',
         'message': 'CleanDrive Bot Server работает!',
@@ -212,18 +197,13 @@ async def handle_test(request):
     })
 
 async def create_web_app(bot_instance):
-    """Создание веб-приложения"""
     app = web.Application()
-    
-    # Сохраняем экземпляр бота в приложении
     app['bot'] = bot_instance
     
-    # Добавляем маршруты
     app.router.add_post('/lead', handle_lead)
     app.router.add_get('/test', handle_test)
     app.router.add_get('/health', handle_test)
     
-    # Настройка CORS
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
             allow_credentials=True,
@@ -233,23 +213,17 @@ async def create_web_app(bot_instance):
         )
     })
     
-    # Добавляем CORS ко всем маршрутам
     for route in list(app.router.routes()):
         cors.add(route)
     
     return app
 
 async def main():
-    """Главная функция"""
     logger.info("Запуск CleanDrive Bot...")
     
-    # Создаем экземпляр бота
     bot_instance = CleanDriveBot()
-    
-    # Создаем веб-приложение
     web_app = await create_web_app(bot_instance)
     
-    # Запускаем веб-сервер
     runner = web.AppRunner(web_app)
     await runner.setup()
     site = web.TCPSite(runner, 'localhost', WEB_PORT)
@@ -259,7 +233,6 @@ async def main():
     logger.info(f"API endpoint: http://localhost:{WEB_PORT}/lead")
     logger.info(f"Test endpoint: http://localhost:{WEB_PORT}/test")
     
-    # Запускаем Telegram бота
     logger.info("Запуск Telegram бота...")
     await bot_instance.app.initialize()
     await bot_instance.app.start()
@@ -268,13 +241,15 @@ async def main():
     logger.info("📋 Для получения Chat ID отправьте /start боту в Telegram")
     
     try:
-        # Ждем завершения
         await bot_instance.app.updater.start_polling()
+        
+        while True:
+            await asyncio.sleep(1)
         
     except KeyboardInterrupt:
         logger.info("Получен сигнал завершения...")
     finally:
-        # Корректное завершение
+        await bot_instance.app.updater.stop()
         await bot_instance.app.stop()
         await runner.cleanup()
         logger.info("CleanDrive Bot остановлен")

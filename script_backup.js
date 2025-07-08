@@ -1,3 +1,4 @@
+// Плавная анимация появления элементов при скролле
 const observerOptions = {
   threshold: 0.1,
   rootMargin: '0px 0px -50px 0px'
@@ -12,6 +13,7 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, observerOptions);
 
+// Наблюдаем за всеми секциями
 document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('.features, .testimonials, .cta');
   sections.forEach(section => {
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Обработка формы
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.querySelector('.cta form');
   
@@ -30,25 +33,33 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = form.querySelector('input[type="text"]').value;
       const phone = form.querySelector('input[type="tel"]').value;
       
+      // Простая валидация
       if (!name.trim() || !phone.trim()) {
         showNotification('Пожалуйста, заполните все поля!', 'error');
         return;
       }
       
+      // Сохраняем данные в localStorage
+      saveFormData(name, phone);
+      
+      // Показываем данные в консоли (для разработки)
       console.log('=== НОВАЯ ЗАЯВКА ===');
       console.log('Имя:', name);
       console.log('Телефон:', phone);
       console.log('Время:', new Date().toLocaleString('ru-RU'));
       console.log('==================');
       
+      // Отправка данных
       const button = form.querySelector('button');
       const originalText = button.textContent;
       
       button.textContent = 'Отправляем...';
       button.disabled = true;
       
+      // Сохраняем данные в localStorage
       saveFormData(name, phone);
       
+      // Сразу показываем успех пользователю
       showNotification('Спасибо! Мы свяжемся с вами в ближайшее время.', 'success');
       form.reset();
       button.textContent = originalText;
@@ -56,10 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
+  // Показываем кнопку для просмотра всех заявок
   showFormDataButton();
+  
+  // Добавляем кнопку для тестирования Telegram бота
   showTelegramTestButton();
 });
 
+// Функция для показа уведомлений
 function showNotification(message, type) {
   const notification = document.createElement('div');
   notification.className = `notification ${type}`;
@@ -96,6 +111,7 @@ function showNotification(message, type) {
   }, 4000);
 }
 
+// Добавляем эффект параллакса для hero секции
 document.addEventListener('DOMContentLoaded', () => {
   const hero = document.querySelector('.hero');
   
@@ -108,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Добавляем эффект печатания для заголовка
 document.addEventListener('DOMContentLoaded', () => {
   const title = document.querySelector('.hero h1');
   if (title) {
@@ -122,16 +139,19 @@ document.addEventListener('DOMContentLoaded', () => {
         i++;
         setTimeout(typeWriter, 100);
       } else {
+        // Убираем курсор после завершения
         setTimeout(() => {
           title.style.borderRight = 'none';
         }, 1000);
       }
     };
     
+    // Запускаем печатание с задержкой
     setTimeout(typeWriter, 1000);
   }
 });
 
+// Добавляем счетчик для чисел
 function animateNumbers() {
   const numbers = document.querySelectorAll('.number-animate');
   
@@ -152,6 +172,7 @@ function animateNumbers() {
   });
 }
 
+// Добавляем кнопку "Наверх"
 document.addEventListener('DOMContentLoaded', () => {
   const scrollToTopBtn = document.createElement('button');
   scrollToTopBtn.innerHTML = '↑';
@@ -177,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.body.appendChild(scrollToTopBtn);
   
+  // Показываем кнопку при прокрутке
   window.addEventListener('scroll', () => {
     if (window.pageYOffset > 300) {
       scrollToTopBtn.style.opacity = '1';
@@ -187,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
+  // Плавная прокрутка наверх
   scrollToTopBtn.addEventListener('click', () => {
     window.scrollTo({
       top: 0,
@@ -194,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
+  // Эффект при наведении
   scrollToTopBtn.addEventListener('mouseenter', () => {
     scrollToTopBtn.style.transform = 'translateY(-5px) scale(1.1)';
     scrollToTopBtn.style.boxShadow = '0 8px 25px rgba(30, 136, 229, 0.4)';
@@ -205,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Добавляем эффект снега для зимнего настроения
 function createSnowflake() {
   const snowflake = document.createElement('div');
   snowflake.innerHTML = '❄';
@@ -226,6 +251,7 @@ function createSnowflake() {
   }, 5000);
 }
 
+// Добавляем CSS для анимации снега
 document.addEventListener('DOMContentLoaded', () => {
   const style = document.createElement('style');
   style.textContent = `
@@ -237,9 +263,11 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
   document.head.appendChild(style);
   
+  // Создаем снежинки каждые 300мс
   setInterval(createSnowflake, 300);
 });
 
+// Функции для работы с данными формы
 function saveFormData(name, phone) {
   const formData = {
     name: name,
@@ -248,81 +276,38 @@ function saveFormData(name, phone) {
     date: new Date().toLocaleString('ru-RU')
   };
   
+  // Сохраняем в localStorage
   let savedData = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
   savedData.push(formData);
   localStorage.setItem('formSubmissions', JSON.stringify(savedData));
   
+  // Отправляем в Telegram
   sendToTelegram(formData);
 }
 
 function sendToTelegram(formData) {
-  console.log('=== ОТПРАВКА В TELEGRAM ===');
-  console.log('Данные:', formData);
-  
-  sendToPythonServer(formData)
-    .then(success => {
-      if (!success) {
-        console.log('Python сервер недоступен, пытаемся отправить напрямую в Telegram...');
-        sendDirectlyToTelegram(formData);
-      }
-    })
-    .catch(error => {
-      console.error('Ошибка при отправке через Python сервер:', error);
-      sendDirectlyToTelegram(formData);
-    });
-}
-
-async function sendToPythonServer(formData) {
-  try {
-    const response = await fetch('http://localhost:3000/lead', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: formData.name,
-        phone: formData.phone,
-        date: formData.date
-      })
-    });
-    
-    const result = await response.json();
-    
-    console.log('=== ОТВЕТ PYTHON СЕРВЕРА ===');
-    console.log('Status:', response.status);
-    console.log('Data:', result);
-    
-    if (result.success) {
-      showNotification('✅ Заявка отправлена в Telegram!', 'success');
-      return true;
-    } else {
-      console.error('Ошибка Python сервера:', result.message);
-      return false;
-    }
-  } catch (error) {
-    console.error('Ошибка подключения к Python серверу:', error);
-    return false;
-  }
-}
-
-function sendDirectlyToTelegram(formData) {
+  // Конфигурация Telegram бота
   const TELEGRAM_BOT_TOKEN = '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ';
-  const TELEGRAM_CHAT_ID = '7099490320';
+  const TELEGRAM_CHAT_ID = '7954963884'; // Попробуем с ID бота сначала
   
   const message = `🚗 Новая заявка CleanDrive!
   
 👤 Имя: ${formData.name}
 📱 Телефон: ${formData.phone}
 🕒 Время: ${formData.date}
-🌐 Источник: Сайт (прямая отправка)
 
 #новая_заявка #cleandrive`;
 
-  console.log('=== ПРЯМАЯ ОТПРАВКА В TELEGRAM ===');
+  console.log('=== ОТПРАВКА В TELEGRAM ===');
+  console.log('Токен бота:', TELEGRAM_BOT_TOKEN);
   console.log('Chat ID:', TELEGRAM_CHAT_ID);
   console.log('Сообщение:', message);
   
+  // Простая отправка без сложной логики
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  
+  // Показываем пользователю, что пытаемся отправить
+  showNotification('� Отправляем в Telegram...', 'success');
   
   fetch(url, {
     method: 'POST',
@@ -341,11 +326,12 @@ function sendDirectlyToTelegram(formData) {
     console.log('Полный ответ:', data);
     
     if (data.ok) {
-      showNotification('✅ Заявка отправлена в Telegram!', 'success');
+      showNotification('✅ Отправлено в Telegram!', 'success');
     } else {
-      showNotification('❌ Ошибка отправки в Telegram: ' + (data.description || 'Неизвестная ошибка'), 'error');
+      showNotification('❌ Ошибка: ' + (data.description || 'Неизвестная ошибка'), 'error');
       console.error('Ошибка Telegram:', data.description);
       
+      // Если ошибка chat not found, показываем инструкцию
       if (data.description && data.description.includes('chat not found')) {
         console.log('💡 РЕШЕНИЕ: Напишите боту /start в Telegram');
         showNotification('💡 Напишите боту /start в Telegram', 'error');
@@ -359,6 +345,7 @@ function sendDirectlyToTelegram(formData) {
 }
 
 function showFormDataButton() {
+  // Создаем кнопку для просмотра всех заявок
   const adminButton = document.createElement('button');
   adminButton.innerHTML = '📋 Посмотреть заявки';
   adminButton.style.cssText = `
@@ -381,6 +368,7 @@ function showFormDataButton() {
   
   adminButton.addEventListener('click', showAllFormData);
   
+  // Эффект при наведении
   adminButton.addEventListener('mouseenter', () => {
     adminButton.style.transform = 'scale(1.1)';
     adminButton.style.boxShadow = '0 8px 25px rgba(40, 167, 69, 0.4)';
@@ -405,6 +393,7 @@ function showAllFormData() {
     dataText += `${index + 1}. ${data.name} - ${data.phone}\n   ${data.date}\n\n`;
   });
   
+  // Создаем модальное окно
   const modal = document.createElement('div');
   modal.style.cssText = `
     position: fixed;
@@ -460,6 +449,7 @@ function showAllFormData() {
   modal.appendChild(modalContent);
   document.body.appendChild(modal);
   
+  // Закрытие по клику на фон
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       modal.remove();
@@ -467,6 +457,7 @@ function showAllFormData() {
   });
 }
 
+// Функция для получения Chat ID
 async function getMyTelegramChatId() {
   const TELEGRAM_BOT_TOKEN = '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ';
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
@@ -496,9 +487,11 @@ async function getMyTelegramChatId() {
   }
 }
 
+// Функция для тестирования бота
 async function testTelegramBot() {
   const TELEGRAM_BOT_TOKEN = '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ';
   
+  // Проверяем бота
   const botInfoUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe`;
   
   try {
@@ -515,6 +508,7 @@ async function testTelegramBot() {
       const chatId = await getMyTelegramChatId();
       
       if (chatId) {
+        // Отправляем тестовое сообщение
         const testMessage = '🧪 Тестовое сообщение от CleanDrive!';
         const sendUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
         
@@ -547,6 +541,7 @@ async function testTelegramBot() {
 }
 
 function showTelegramTestButton() {
+  // Создаем кнопку для тестирования Telegram
   const testButton = document.createElement('button');
   testButton.innerHTML = '🤖 Тест Telegram';
   testButton.style.cssText = `
@@ -572,6 +567,7 @@ function showTelegramTestButton() {
     testTelegramBot();
   });
   
+  // Эффект при наведении
   testButton.addEventListener('mouseenter', () => {
     testButton.style.transform = 'scale(1.1)';
     testButton.style.boxShadow = '0 8px 25px rgba(0, 123, 255, 0.4)';
