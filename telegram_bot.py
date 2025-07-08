@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 CleanDrive Telegram Bot
-Бот для получения заявок с сайта автопылесоса
+Бот для получения заявок
 """
 
 import asyncio
