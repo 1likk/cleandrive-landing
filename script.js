@@ -81,10 +81,11 @@ function initForm() {
 
 // Отправка в Telegram
 async function sendToTelegram(formData) {
-  // Определяем URL API в зависимости от окружения
+  // Используем тестовый API с захардкоженными данными
   const isLocalhost = window.location.hostname === 'localhost';
-  const apiUrl = isLocalhost ? 'http://localhost:3000/lead' : '/api/telegram';
+  const apiUrl = isLocalhost ? 'http://localhost:3000/lead' : '/api/test-telegram';
   
+  console.log(`🧪 ТЕСТОВЫЙ РЕЖИМ!`);
   console.log(`🌐 Окружение: ${isLocalhost ? 'разработка' : 'продакшен'}`);
   console.log(`📤 Отправляем на: ${apiUrl}`);
   console.log(`📋 Данные:`, formData);

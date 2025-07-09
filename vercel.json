@@ -5,6 +5,9 @@
     },
     "api/check-env.py": {
       "runtime": "python3.9"
+    },
+    "api/test-telegram.py": {
+      "runtime": "python3.9"
     }
   },
   "rewrites": [
@@ -15,6 +18,10 @@
     {
       "source": "/api/check-env",
       "destination": "/api/check-env.py"
+    },
+    {
+      "source": "/api/test-telegram",
+      "destination": "/api/test-telegram.py"
     },
     {
       "source": "/admin",
