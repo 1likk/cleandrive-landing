@@ -86,6 +86,8 @@ async function sendToTelegram(formData) {
   const apiUrl = isLocalhost ? 'http://localhost:3000/lead' : '/api/telegram';
   
   console.log(`🌐 Окружение: ${isLocalhost ? 'разработка' : 'продакшен'}`);
+  console.log(`📤 Отправляем на: ${apiUrl}`);
+  console.log(`📋 Данные:`, formData);
   
   try {
     const response = await fetch(apiUrl, {
@@ -97,11 +99,16 @@ async function sendToTelegram(formData) {
       body: JSON.stringify(formData)
     });
     
+    console.log(`📡 Статус ответа: ${response.status} ${response.statusText}`);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Ошибка ответа:', errorText);
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
     const result = await response.json();
+    console.log('📨 Ответ сервера:', result);
     
     if (!result.success) {
       throw new Error(result.message || result.error || 'Неизвестная ошибка');
