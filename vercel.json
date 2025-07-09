@@ -1,16 +1,16 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/telegram",
-      "destination": "/api/telegram.py"
+      "src": "/api/telegram",
+      "dest": "/api/telegram.py"
     },
     {
-      "source": "/admin",
-      "destination": "/admin.html"
+      "src": "/admin",
+      "dest": "/admin.html"
     },
     {
-      "source": "/thank-you",
-      "destination": "/thank-you.html"
+      "src": "/thank-you",
+      "dest": "/thank-you.html"
     }
   ]
 }
