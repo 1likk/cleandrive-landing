@@ -2,6 +2,9 @@
   "functions": {
     "api/telegram.py": {
       "runtime": "python3.9"
+    },
+    "api/check-env.py": {
+      "runtime": "python3.9"
     }
   },
   "rewrites": [
@@ -10,12 +13,20 @@
       "destination": "/api/telegram.py"
     },
     {
+      "source": "/api/check-env",
+      "destination": "/api/check-env.py"
+    },
+    {
       "source": "/admin",
       "destination": "/admin.html"
     },
     {
       "source": "/thank-you",
       "destination": "/thank-you.html"
+    },
+    {
+      "source": "/check-env",
+      "destination": "/check-env.html"
     }
   ],
   "headers": [
