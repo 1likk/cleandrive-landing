@@ -1,31 +1,22 @@
 #!/usr/bin/env python3
-"""
-Сервер для локальной разработки CleanDrive
-Совмещает веб-сервер для HTML/CSS/JS и API для Telegram
-"""
+"""CleanDrive dev-server"""
 
 import os
 import json
 import asyncio
 import logging
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, Any
-
 from aiohttp import web, ClientSession
 from aiohttp.web_fileresponse import FileResponse
 from aiohttp_cors import setup as setup_cors
 from dotenv import load_dotenv
 
-# Загружаем переменные окружения (сначала .env.local, потом .env)
-load_dotenv('.env.local')  # Приоритет для локальных токенов
-load_dotenv('.env')        # Fallback на общий файл
+# Загружаем переменные окружения
+load_dotenv('.env.local')
+load_dotenv('.env')
 
-# Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# Логирование
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Конфигурация
@@ -131,7 +122,7 @@ class DevServer:
                 'message': 'Внутренняя ошибка сервера'
             }, status=500)
     
-    async def send_to_telegram(self, lead: Dict[str, Any]):
+    async def send_to_telegram(self, lead):
         """Отправка в Telegram"""
         if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
             logger.warning("⚠️  Telegram не настроен")

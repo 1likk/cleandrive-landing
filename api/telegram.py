@@ -124,7 +124,3 @@ def handler(request):
                 'error': f'Server error: {str(e)}'
             })
         }
-
-# For Vercel
-def main(request):
-    return handler(request)
