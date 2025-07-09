@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Админ-панель - CleanDrive</title>
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .leads-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .leads-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .lead-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .lead-item:last-child {
+            border-bottom: none;
+        }
+        
+        .lead-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .lead-info h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        .lead-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .lead-time {
+            color: #999;
+            font-size: 0.8em;
+        }
+        
+        .call-btn {
+            background: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        
+        .call-btn:hover {
+            background: #1e7e34;
+        }
+        
+        .refresh-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #999;
+        }
+        
+        .search-box {
+            margin: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            width: calc(100% - 40px);
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .lead-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .leads-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Админ-панель CleanDrive</h1>
+            <p>Управление заявками автопылесоса</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>📋 Всего заявок</h3>
+                <div class="stat-number" id="totalLeads">0</div>
+                <p>За все время</p>
+            </div>
+            <div class="stat-card">
+                <h3>📅 Сегодня</h3>
+                <div class="stat-number" id="todayLeads">0</div>
+                <p>Новых заявок</p>
+            </div>
+            <div class="stat-card">
+                <h3>⏱️ Последняя</h3>
+                <div class="stat-number" id="lastLeadTime">--:--</div>
+                <p>Время последней заявки</p>
+            </div>
+            <div class="stat-card">
+                <h3>🔄 Статус</h3>
+                <div class="stat-number" id="botStatus">🔴</div>
+                <p>Telegram бот</p>
+            </div>
+        </div>
+        
+        <div class="leads-container">
+            <div class="leads-header">
+                <h2>📞 Заявки клиентов</h2>
+                <button class="refresh-btn" onclick="loadLeads()">🔄 Обновить</button>
+            </div>
+            
+            <input type="text" class="search-box" id="searchInput" placeholder="🔍 Поиск по имени или телефону..." oninput="filterLeads()">
+            
+            <div id="leadsContainer">
+                <div class="empty-state">
+                    <h3>📭 Заявок пока нет</h3>
+                    <p>Новые заявки будут отображаться здесь</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allLeads = [];
+        
+        // Загрузка заявок при старте
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLeads();
+            checkBotStatus();
+            
+            // Автообновление каждые 30 секунд
+            setInterval(loadLeads, 30000);
+            setInterval(checkBotStatus, 60000);
+        });
+        
+        async function loadLeads() {
+            try {
+                // Загружаем из localStorage (синхронизация с основным сайтом)
+                const localLeads = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
+                allLeads = localLeads;
+                
+                updateStats();
+                displayLeads(allLeads);
+                
+                console.log(`📊 Загружено ${allLeads.length} заявок`);
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+            }
+        }
+        
+        async function checkBotStatus() {
+            try {
+                const response = await fetch('http://localhost:3000/test');
+                const data = await response.json();
+                
+                if (data.status === 'OK') {
+                    document.getElementById('botStatus').textContent = '🟢';
+                    document.getElementById('botStatus').nextElementSibling.textContent = 'Активен';
+                } else {
+                    throw new Error('Bot not responding');
+                }
+            } catch (error) {
+                document.getElementById('botStatus').textContent = '🔴';
+                document.getElementById('botStatus').nextElementSibling.textContent = 'Не активен';
+            }
+        }
+        
+        function updateStats() {
+            const total = allLeads.length;
+            const today = new Date().toDateString();
+            const todayLeads = allLeads.filter(lead => 
+                new Date(lead.timestamp).toDateString() === today
+            ).length;
+            
+            const lastLead = allLeads[allLeads.length - 1];
+            const lastTime = lastLead ? 
+                new Date(lastLead.timestamp).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'}) : 
+                '--:--';
+            
+            document.getElementById('totalLeads').textContent = total;
+            document.getElementById('todayLeads').textContent = todayLeads;
+            document.getElementById('lastLeadTime').textContent = lastTime;
+        }
+        
+        function displayLeads(leads) {
+            const container = document.getElementById('leadsContainer');
+            
+            if (leads.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>📭 Заявок пока нет</h3>
+                        <p>Новые заявки будут отображаться здесь</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const leadsHtml = leads.reverse().map((lead, index) => `
+                <div class="lead-item">
+                    <div class="lead-number">${leads.length - index}</div>
+                    <div class="lead-info">
+                        <h3>${lead.name}</h3>
+                        <p>📱 ${lead.phone}</p>
+                    </div>
+                    <div class="lead-time">
+                        ${new Date(lead.timestamp).toLocaleString('ru-RU')}
+                    </div>
+                    <a href="tel:${lead.phone}" class="call-btn">📞 Позвонить</a>
+                </div>
+            `).join('');
+            
+            container.innerHTML = leadsHtml;
+        }
+        
+        function filterLeads() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredLeads = allLeads.filter(lead => 
+                lead.name.toLowerCase().includes(searchTerm) || 
+                lead.phone.includes(searchTerm)
+            );
+            displayLeads(filteredLeads);
+        }
+        
+        // Экспорт данных
+        function exportLeads() {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "Номер,Имя,Телефон,Дата,Время\n" +
+                allLeads.map((lead, index) => 
+                    `${index + 1},"${lead.name}","${lead.phone}","${new Date(lead.timestamp).toLocaleDateString('ru-RU')}","${new Date(lead.timestamp).toLocaleTimeString('ru-RU')}"`
+                ).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `cleandrive_leads_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Горячие клавиши
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                loadLeads();
+            }
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                exportLeads();
+            }
+        });
+    </script>
+</body>
+</html>

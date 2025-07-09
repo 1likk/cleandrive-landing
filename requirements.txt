@@ -1,12 +1,5 @@
 
-# CleanDrive Telegram Bot зависимости
-python-telegram-bot==20.7
+# CleanDrive - зависимости
 aiohttp==3.9.1
 aiohttp-cors==0.7.0
-
-# Веб-сервер для разработки (альтернатива)
-# python3 -m http.server 8000
-
-# Для более продвинутого сервера можно использовать:
-# flask==2.3.3
-# gunicorn==21.2.0
+python-dotenv==1.0.0

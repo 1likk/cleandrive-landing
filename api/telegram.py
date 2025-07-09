@@ -1,16 +1,16 @@
 import json
+import os
 import requests
 from datetime import datetime
-from urllib.parse import parse_qs
 
-# Telegram bot configuration
-BOT_TOKEN = "7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ"
-CHAT_ID = "7099490320"
+# Telegram bot configuration (можно вынести в переменные окружения Vercel)
+BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ')
+CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '7099490320')
 
 def handler(request):
-    """Vercel serverless function for handling Telegram messages"""
+    """Vercel serverless function for handling lead submissions"""
     
-    # Handle CORS
+    # Handle CORS preflight
     if request.method == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -18,19 +18,31 @@ def handler(request):
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type',
-            }
+                'Access-Control-Max-Age': '86400',
+            },
+            'body': ''
         }
     
+    # Only allow POST for lead submissions
     if request.method != 'POST':
         return {
             'statusCode': 405,
-            'body': json.dumps({'error': 'Method not allowed'})
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+            },
+            'body': json.dumps({
+                'success': False,
+                'message': 'Method not allowed'
+            })
         }
     
     try:
-        # Parse request body
-        if hasattr(request, 'body'):
-            body = json.loads(request.body)
+        # Parse request body (handle different Vercel request formats)
+        if hasattr(request, 'get_json'):
+            body = request.get_json()
+        elif hasattr(request, 'body'):
+            body = json.loads(request.body.decode('utf-8') if isinstance(request.body, bytes) else request.body)
         else:
             body = json.loads(request.data.decode('utf-8'))
         
@@ -45,7 +57,10 @@ def handler(request):
                     'Access-Control-Allow-Origin': '*',
                     'Content-Type': 'application/json',
                 },
-                'body': json.dumps({'error': 'Name and phone are required'})
+                'body': json.dumps({
+                    'success': False,
+                    'message': 'Имя и телефон обязательны'
+                })
             }
         
         # Prepare Telegram message
