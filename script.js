@@ -219,11 +219,6 @@ document.addEventListener('click', (e) => {
 function showAdminPanel() {
   const saved = JSON.parse(localStorage.getItem('formSubmissions') || '[]');
   
-  if (saved.length === 0) {
-    alert('Заявок пока нет');
-    return;
-  }
-  
   const panel = document.createElement('div');
   panel.style.cssText = `
     position: fixed;
@@ -240,20 +235,28 @@ function showAdminPanel() {
     overflow-y: auto;
   `;
   
-  panel.innerHTML = `
-    <h3>📋 Заявки (${saved.length})</h3>
-    <div style="max-height: 300px; overflow-y: auto;">
-      ${saved.map((item, index) => `
-        <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 5px;">
-          <strong>${index + 1}. ${item.name}</strong><br>
-          📱 ${item.phone}<br>
-          🕒 ${item.date}
-        </div>
-      `).join('')}
-    </div>
-    <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px;">Закрыть</button>
-    <button onclick="localStorage.removeItem('formSubmissions'); this.parentElement.remove(); alert('Заявки очищены')" style="margin-top: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px;">Очистить все</button>
-  `;
+  if (saved.length === 0) {
+    panel.innerHTML = `
+      <h3>📋 Заявки (0)</h3>
+      <p>Заявок пока нет. Как только кто-то оставит заявку, она появится здесь.</p>
+      <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px;">Закрыть</button>
+    `;
+  } else {
+    panel.innerHTML = `
+      <h3>📋 Заявки (${saved.length})</h3>
+      <div style="max-height: 300px; overflow-y: auto;">
+        ${saved.map((item, index) => `
+          <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 5px;">
+            <strong>${index + 1}. ${item.name}</strong><br>
+            📱 ${item.phone}<br>
+            🕒 ${item.date}
+          </div>
+        `).join('')}
+      </div>
+      <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px;">Закрыть</button>
+      <button onclick="localStorage.removeItem('formSubmissions'); this.parentElement.remove(); alert('Заявки очищены')" style="margin-top: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px;">Очистить все</button>
+    `;
+  }
   
   document.body.appendChild(panel);
 }
@@ -261,8 +264,10 @@ function showAdminPanel() {
 // Горячие клавиши для админа
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+    console.log('🔑 Открываем админ-панель');
     showAdminPanel();
   }
 });
 
 console.log('🚀 CleanDrive готов!');
+console.log('💡 Подсказка: Нажмите Ctrl+Shift+A для открытия админ-панели');
