@@ -81,14 +81,9 @@ function initForm() {
 
 // Отправка в Telegram
 async function sendToTelegram(formData) {
-  // Используем тестовый API с захардкоженными данными
+  // Определяем URL API в зависимости от окружения
   const isLocalhost = window.location.hostname === 'localhost';
-  const apiUrl = isLocalhost ? 'http://localhost:3000/lead' : '/api/test-telegram';
-  
-  console.log(`🧪 ТЕСТОВЫЙ РЕЖИМ!`);
-  console.log(`🌐 Окружение: ${isLocalhost ? 'разработка' : 'продакшен'}`);
-  console.log(`📤 Отправляем на: ${apiUrl}`);
-  console.log(`📋 Данные:`, formData);
+  const apiUrl = isLocalhost ? 'http://localhost:3000/lead' : '/api/telegram';
   
   try {
     const response = await fetch(apiUrl, {
@@ -100,22 +95,17 @@ async function sendToTelegram(formData) {
       body: JSON.stringify(formData)
     });
     
-    console.log(`📡 Статус ответа: ${response.status} ${response.statusText}`);
-    
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Ошибка ответа:', errorText);
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
     const result = await response.json();
-    console.log('📨 Ответ сервера:', result);
     
     if (!result.success) {
       throw new Error(result.message || result.error || 'Неизвестная ошибка');
     }
     
-    console.log('✅ Заявка отправлена через основной API');
+    console.log('✅ Заявка отправлена');
     
   } catch (error) {
     console.error('❌ Ошибка отправки:', error);
@@ -272,10 +262,8 @@ function showAdminPanel() {
 // Горячие клавиши для админа
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-    console.log('🔑 Открываем админ-панель');
     showAdminPanel();
   }
 });
 
 console.log('🚀 CleanDrive готов!');
-console.log('💡 Подсказка: Нажмите Ctrl+Shift+A для открытия админ-панели');
