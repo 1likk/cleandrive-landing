@@ -7,6 +7,10 @@
 ehthumbs.db
 Thumbs.db
 
+# Секретные файлы
+.env.local
+.env.production
+
 # Логи
 *.log
 npm-debug.log*

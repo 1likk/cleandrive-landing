@@ -3,9 +3,12 @@ import os
 import requests
 from datetime import datetime
 
-# Telegram bot configuration (можно вынести в переменные окружения Vercel)
-BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ')
-CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '7099490320')
+# Telegram configuration
+BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+
+if not BOT_TOKEN or not CHAT_ID:
+    raise ValueError("TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID должны быть установлены в переменных окружения")
 
 def handler(request):
     """Vercel serverless function for handling lead submissions"""

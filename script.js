@@ -1,4 +1,4 @@
-// CleanDrive - оптимизированная версия
+// CleanDrive
 document.addEventListener('DOMContentLoaded', () => {
   initAnimations();
   initForm();
@@ -82,21 +82,12 @@ function initForm() {
 // Отправка в Telegram
 async function sendToTelegram(formData) {
   // Определяем URL API в зависимости от окружения
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const isProduction = window.location.hostname.includes('vercel.app') || window.location.hostname !== 'localhost';
-  
-  let apiUrl;
-  if (isLocalhost) {
-    apiUrl = 'http://localhost:3000/lead';
-  } else {
-    apiUrl = '/api/telegram';
-  }
+  const isLocalhost = window.location.hostname === 'localhost';
+  const apiUrl = isLocalhost ? 'http://localhost:3000/lead' : '/api/telegram';
   
   console.log(`🌐 Окружение: ${isLocalhost ? 'разработка' : 'продакшен'}`);
-  console.log(`📡 API URL: ${apiUrl}`);
   
   try {
-    // Основной способ через API
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 
@@ -106,14 +97,11 @@ async function sendToTelegram(formData) {
       body: JSON.stringify(formData)
     });
     
-    console.log(`📊 Ответ сервера: ${response.status} ${response.statusText}`);
-    
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
     const result = await response.json();
-    
     
     if (!result.success) {
       throw new Error(result.message || result.error || 'Неизвестная ошибка');
@@ -122,44 +110,8 @@ async function sendToTelegram(formData) {
     console.log('✅ Заявка отправлена через основной API');
     
   } catch (error) {
-    console.log(`❌ Ошибка основного API: ${error.message}`);
-    console.log('🔄 Пробуем запасной способ через прямой Telegram API...');
-    
-    // Запасной способ через прямой Telegram API (только если основной не сработал)
-    try {
-      const message = `🚗 Новая заявка с сайта!
-
-👤 Имя: ${formData.name}
-📱 Телефон: ${formData.phone}
-🕒 Время: ${formData.date}
-🌐 Источник: Сайт (fallback)
-
-#заявка #fallback`;
-
-      const telegramResponse = await fetch(`https://api.telegram.org/bot7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: '7099490320',
-          text: message
-        })
-      });
-
-      if (!telegramResponse.ok) {
-        throw new Error(`Telegram API error: ${telegramResponse.status}`);
-      }
-      
-      const telegramResult = await telegramResponse.json();
-      if (!telegramResult.ok) {
-        throw new Error(telegramResult.description || 'Telegram API error');
-      }
-      
-      console.log('✅ Заявка отправлена через прямой Telegram API');
-      
-    } catch (fallbackError) {
-      console.error('❌ Все способы отправки не сработали:', fallbackError);
-      throw new Error('Не удалось отправить заявку. Попробуйте позже.');
-    }
+    console.error('❌ Ошибка отправки:', error);
+    throw new Error('Не удалось отправить заявку. Попробуйте позже.');
   }
 }
 
@@ -313,5 +265,4 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-console.log('🚀 CleanDrive загружен успешно!');
-console.log('💡 Ctrl+Shift+A для просмотра заявок');
+console.log('🚀 CleanDrive готов!');
