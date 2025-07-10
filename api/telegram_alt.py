@@ -5,7 +5,7 @@ import urllib.parse
 from datetime import datetime
 
 def handler(request):
-    """Main handler for Vercel"""
+    """Vercel serverless function handler"""
     
     # Handle CORS preflight
     if request.method == 'OPTIONS':
@@ -53,7 +53,11 @@ def handler(request):
             }
         
         # Parse request body
-        body = request.get_body()
+        if hasattr(request, 'body'):
+            body = request.body
+        else:
+            body = request.get_body()
+            
         if not body:
             return {
                 'statusCode': 400,

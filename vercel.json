@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/telegram",
+      "destination": "/api/telegram.py"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/thank-you",
+      "destination": "/thank-you.html"
+    }
+  ]
+}
