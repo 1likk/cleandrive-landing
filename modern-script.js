@@ -122,7 +122,7 @@ function initOrderForm() {
             showNotification('Отправка заказа...', 'info');
             
             try {
-                // Отправляем данные на сервер
+                // Пробуем сначала через API
                 const response = await fetch('/api/telegram', {
                     method: 'POST',
                     headers: {
@@ -153,7 +153,50 @@ function initOrderForm() {
                 }
             } catch (error) {
                 console.error('Error submitting form:', error);
-                showNotification('Произошла ошибка при отправке формы. Пожалуйста, попробуйте позже.', 'error');
+                showNotification('Пробуем альтернативный способ отправки...', 'info');
+                
+                // Попытка отправить напрямую через Telegram API
+                try {
+                    // Резервный токен и chat_id
+                    const botToken = '7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ';
+                    const chatId = '7099490320';
+                    
+                    // Формируем сообщение
+                    const message = `🔔 НОВАЯ ЗАЯВКА!\n\n👤 Имя: ${formData.name}\n📱 Телефон: ${formData.phone}\n🏙️ Город: ${formData.city || 'Не указан'}\n\n⏰ Дата: ${new Date().toLocaleString('ru-RU')}`;
+                    
+                    // Прямой запрос к Telegram API
+                    const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: message,
+                            parse_mode: 'HTML'
+                        })
+                    });
+                    
+                    const telegramResult = await telegramResponse.json();
+                    
+                    if (telegramResult.ok) {
+                        // Успешно отправлено через прямой API
+                        showNotification('Заказ успешно отправлен! Мы свяжемся с вами в ближайшее время.', 'success');
+                        orderForm.reset();
+                        
+                        // Перенаправляем на страницу благодарности через 2 секунды
+                        setTimeout(() => {
+                            window.location.href = '/thank-you.html';
+                        }, 2000);
+                        return;
+                    } else {
+                        throw new Error('Telegram API error: ' + (telegramResult.description || 'Unknown error'));
+                    }
+                } catch (telegramError) {
+                    console.error('Error with direct Telegram API:', telegramError);
+                }
+                
+                showNotification('Произошла ошибка при отправке формы. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону.', 'error');
                 
                 // Сохраняем данные формы локально для повторной отправки
                 const savedData = {
@@ -222,30 +265,49 @@ function showNotification(message, type = 'info') {
             style.textContent = `
                 .notification-container {
                     position: fixed;
-                    top: 20px;
-                    right: 20px;
+                    bottom: 20px; /* Изменено с top на bottom */
+                    left: 50%; /* Центрируем по горизонтали */
+                    transform: translateX(-50%);
                     z-index: 9999;
+                    width: 90%;
+                    max-width: 450px;
                 }
                 .notification {
-                    padding: 15px 20px;
+                    padding: 18px 20px;
                     margin-bottom: 10px;
-                    border-radius: 8px;
+                    border-radius: 10px;
                     color: white;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+                    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
                     display: flex;
                     align-items: center;
-                    max-width: 350px;
+                    width: 100%;
                     opacity: 0;
-                    transform: translateX(50px);
-                    transition: all 0.3s ease;
+                    transform: translateY(20px);
+                    transition: all 0.4s ease;
+                    position: relative;
                 }
                 .notification.show {
                     opacity: 1;
-                    transform: translateX(0);
+                    transform: translateY(0);
                 }
-                .notification i {
-                    margin-right: 10px;
-                    font-size: 1.2rem;
+                .notification i.icon {
+                    margin-right: 15px;
+                    font-size: 1.3rem;
+                }
+                .notification .close-btn {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    font-size: 0.9rem;
+                    color: rgba(255, 255, 255, 0.7);
+                    cursor: pointer;
+                }
+                .notification .close-btn:hover {
+                    color: white;
+                }
+                .notification-content {
+                    flex: 1;
+                    font-weight: 500;
                 }
                 .notification-info {
                     background: linear-gradient(135deg, #4a7ef7, #617ef6);
@@ -271,23 +333,36 @@ function showNotification(message, type = 'info') {
     if (type === 'error') icon = 'exclamation-circle';
     
     notification.innerHTML = `
-        <i class="fas fa-${icon}"></i>
-        <span>${message}</span>
+        <i class="fas fa-${icon} icon"></i>
+        <div class="notification-content">${message}</div>
+        <i class="fas fa-times close-btn"></i>
     `;
     
     // Добавляем уведомление в контейнер
     notificationContainer.appendChild(notification);
+    
+    // Добавляем обработчик для кнопки закрытия
+    const closeBtn = notification.querySelector('.close-btn');
+    closeBtn.addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
     
     // Добавляем класс для анимации
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
     
-    // Удаляем уведомление через 5 секунд
-    setTimeout(() => {
+    // Удаляем уведомление через 8 секунд (увеличено время)
+    const timeout = setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => {
             notification.remove();
         }, 300);
-    }, 5000);
+    }, 8000);
+    
+    // Сохраняем timeout, чтобы можно было отменить его при ручном закрытии
+    notification.dataset.timeout = timeout;
 }
