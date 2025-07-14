@@ -14,16 +14,24 @@ class handler(BaseHTTPRequestHandler):
         bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
         chat_id = os.getenv('TELEGRAM_CHAT_ID')
         
+        # Fallback values (same as in telegram.py)
+        fallback_token = "7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ"
+        fallback_chat_id = "7099490320"
+        
         response = {
             'telegram_bot_token': {
                 'present': bool(bot_token),
                 'length': len(bot_token) if bot_token else 0,
-                'preview': bot_token[:10] + '...' if bot_token and len(bot_token) > 10 else bot_token
+                'preview': bot_token[:10] + '...' if bot_token and len(bot_token) > 10 else bot_token,
+                'using_fallback': not bool(bot_token),
+                'fallback_available': bool(fallback_token)
             },
             'telegram_chat_id': {
                 'present': bool(chat_id),
                 'value': chat_id,
-                'type': type(chat_id).__name__
+                'type': type(chat_id).__name__,
+                'using_fallback': not bool(chat_id),
+                'fallback_available': bool(fallback_chat_id)
             },
             'all_env_vars': {
                 key: '***' if 'TOKEN' in key.upper() or 'SECRET' in key.upper() else value

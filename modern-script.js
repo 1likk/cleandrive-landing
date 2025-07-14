@@ -131,6 +131,10 @@ function initOrderForm() {
                     body: JSON.stringify(formData)
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                }
+                
                 const result = await response.json();
                 
                 if (result.success) {
@@ -145,10 +149,27 @@ function initOrderForm() {
                 } else {
                     // Ошибка отправки
                     showNotification(`Ошибка при отправке: ${result.error || 'Попробуйте позже'}`, 'error');
+                    console.error('Form submission error:', result);
                 }
             } catch (error) {
                 console.error('Error submitting form:', error);
                 showNotification('Произошла ошибка при отправке формы. Пожалуйста, попробуйте позже.', 'error');
+                
+                // Сохраняем данные формы локально для повторной отправки
+                const savedData = {
+                    timestamp: new Date().toISOString(),
+                    formData
+                };
+                
+                try {
+                    // Сохраняем данные в localStorage для возможности повторной отправки
+                    const savedForms = JSON.parse(localStorage.getItem('savedForms') || '[]');
+                    savedForms.push(savedData);
+                    localStorage.setItem('savedForms', JSON.stringify(savedForms));
+                    console.log('Form data saved locally for retry');
+                } catch (storageError) {
+                    console.error('Error saving form data:', storageError);
+                }
             }
         });
         

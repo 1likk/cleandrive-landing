@@ -39,6 +39,13 @@ def handler(request):
         bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
         chat_id = os.getenv('TELEGRAM_CHAT_ID')
         
+        # Fallback to hardcoded values if environment variables are not set
+        if not bot_token:
+            bot_token = "7954963884:AAFOLEMMTEAN6YCi-Gb1gs8JOCy8ZByloYQ"
+        
+        if not chat_id:
+            chat_id = "7099490320"
+        
         if not bot_token or not chat_id:
             return {
                 'statusCode': 500,
