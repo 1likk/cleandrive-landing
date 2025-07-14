@@ -1,69 +1,127 @@
-/* Дополнительные стили для исправления проблемы с красным и желтым цветом */
+/* Стили фиксации цветов и элементов дизайна в стиле set24.kz - светлая версия */
+
+:root {
+  --primary-color: #4a7ef7;
+  --primary-light: #dbe7ff;
+  --primary-gradient: linear-gradient(135deg, #4a7ef7, #617ef6);
+  --secondary-color: #4364e9;
+  --text-dark: #1a2236;
+  --text-medium: #455275;
+  --text-light: #667694;
+  --background-light: #f8fafc;
+  --background-white: #ffffff;
+  --shadow-soft: 0 10px 40px rgba(67, 100, 233, 0.1);
+  --shadow-card: 0 15px 35px rgba(67, 100, 233, 0.08);
+}
+
 body {
-  background: linear-gradient(135deg, #f8fafc 60%, #e0e7ff 100%) !important;
-  color: #1e293b !important;
+  background: var(--background-light) !important;
+  color: var(--text-dark) !important;
 }
 
+/* Навигационное меню */
 .navbar {
-  background: rgba(255,255,255,0.9) !important;
-  box-shadow: 0 4px 24px rgba(30,64,175,0.08) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid rgba(67, 100, 233, 0.1) !important;
+  box-shadow: var(--shadow-soft) !important;
 }
 
+.nav-brand i, 
+.nav-link:hover {
+  color: var(--primary-color) !important;
+}
+
+.nav-cta, 
+.btn-primary {
+  background: var(--primary-gradient) !important;
+  box-shadow: 0 5px 15px rgba(74, 126, 247, 0.2) !important;
+}
+
+.nav-cta:hover, 
+.btn-primary:hover {
+  box-shadow: 0 8px 25px rgba(74, 126, 247, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Градиентный текст */
+.gradient-text {
+  background: var(--primary-gradient) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Секции страницы */
 .hero {
-  background: linear-gradient(135deg, #f0f5ff 60%, #e0e7ff 100%) !important;
+  background: linear-gradient(160deg, #f0f5ff 0%, #dbe7ff 100%) !important;
 }
 
-.features, .reviews {
-  background: linear-gradient(135deg, #ffffff 60%, #f0f5ff 100%) !important;
+.features, .order-section {
+  background: var(--background-white) !important;
 }
 
-.feature-card, .review-card, .order-info, .order-form {
-  background: #ffffff !important;
-  color: #1e293b !important;
-  border: 1.5px solid #e0e7ff !important;
-  box-shadow: 0 4px 24px rgba(30,64,175,0.08) !important;
+.reviews {
+  background: linear-gradient(160deg, #f8fafc 0%, #f0f5ff 100%) !important;
 }
 
-.footer {
-  background: rgba(255,255,255,0.9) !important;
-  color: #1e293b !important;
+/* Карточки и элементы */
+.feature-card, 
+.review-card, 
+.order-form {
+  background: var(--background-white) !important;
+  border: 1px solid rgba(67, 100, 233, 0.1) !important;
+  box-shadow: var(--shadow-card) !important;
 }
 
-/* Изменяем цвет звездочек на синий */
+.feature-card:hover, 
+.review-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: var(--shadow-soft) !important;
+  border-color: rgba(67, 100, 233, 0.2) !important;
+}
+
+.order-info {
+  background: linear-gradient(160deg, #f0f5ff 0%, #dbe7ff 100%) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+/* Иконки и акценты */
+.feature-icon {
+  background: linear-gradient(135deg, rgba(74, 126, 247, 0.1), rgba(97, 126, 246, 0.1)) !important;
+  color: var(--primary-color) !important;
+}
+
+.benefit-icon, 
 .review-stars {
-  color: #3b82f6 !important;
+  color: var(--primary-color) !important;
 }
 
-/* Меняем цвет индикатора остатков товара на более мягкий */
+/* Счетчик остатка */
 .stock-counter {
-  background: #f0f5ff !important;
-  border: 1px dashed #3b82f6 !important;
+  background: var(--primary-light) !important;
+  border: 1px dashed var(--primary-color) !important;
 }
 
 .stock-counter p {
-  color: #3b82f6 !important;
+  color: var(--primary-color) !important;
 }
 
 .stock-line {
-  background: #dbeafe !important;
+  background: var(--primary-color) !important;
 }
 
-.stock-line-inner {
-  background: #3b82f6 !important;
+/* Формы и поля ввода */
+.form-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(74, 126, 247, 0.2) !important;
 }
 
-/* Обновляем акцентные цвета на синий */
-.gradient-text,
-.btn-primary,
-.btn-order,
-.nav-cta {
-  background: linear-gradient(90deg, #2563eb 60%, #1e40af 100%) !important;
+/* Подвал */
+.footer {
+  background: linear-gradient(160deg, #f0f5ff 0%, #dbe7ff 100%) !important;
 }
 
-.feature-icon {
-  background: linear-gradient(135deg, #2563eb 60%, #1e40af 100%) !important;
-}
-
-.stock-line-inner {
-  background: #3b82f6 !important;
+.social-link:hover {
+  background: var(--primary-gradient) !important;
+  color: white !important;
 }

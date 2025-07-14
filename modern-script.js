@@ -1,10 +1,7 @@
-// Оптимизированный скрипт CleanDrive
+// Современный скрипт CleanDrive в стиле set24.kz
 document.addEventListener('DOMContentLoaded', function() {
     // Навигация и UI эффекты
     initNavigation();
-    
-    // Счетчик акции
-    initCountdown();
     
     // Обработка формы
     initOrderForm();
@@ -36,38 +33,68 @@ function initNavigation() {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+                window.scrollTo({
+                    top: target.offsetTop - 80, // Учитываем высоту navbar
+                    behavior: 'smooth'
                 });
             }
         });
     });
+
+    // Анимация для элементов при загрузке главного экрана
+    const heroElements = document.querySelectorAll('.hero .animated');
+    heroElements.forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+    });
 }
 
-// Инициализация счетчика обратного отсчета
-function initCountdown() {
-    const countdownHours = document.getElementById('countdown-hours');
-    const countdownMinutes = document.getElementById('countdown-minutes');
-    const countdownSeconds = document.getElementById('countdown-seconds');
+// Инициализация анимаций при скролле
+function initScrollAnimations() {
+    // Анимации при скролле для карточек и других элементов
+    const animatedElements = document.querySelectorAll('.animated:not(.hero *)');
     
-    if (countdownHours && countdownMinutes && countdownSeconds) {
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const endTime = now + (24 * 60 * 60 * 1000); // 24 часа от текущего времени
-            const timeLeft = endTime - now;
-            
-            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-            
-            countdownHours.textContent = hours.toString().padStart(2, '0');
-            countdownMinutes.textContent = minutes.toString().padStart(2, '0');
-            countdownSeconds.textContent = seconds.toString().padStart(2, '0');
-        }
-        
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+    });
+    
+    animatedElements.forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        observer.observe(el);
+    });
+
+    // Добавляем стили для анимации
+    if (!document.getElementById('animation-styles')) {
+        const style = document.createElement('style');
+        style.id = 'animation-styles';
+        style.textContent = `
+            .animated {
+                transition: opacity 0.5s ease, transform 0.5s ease;
+            }
+            .animated.visible {
+                opacity: 1 !important;
+                transform: translateY(0) !important;
+            }
+            .delay-1.visible {
+                transition-delay: 0.1s;
+            }
+            .delay-2.visible {
+                transition-delay: 0.2s;
+            }
+            .delay-3.visible {
+                transition-delay: 0.3s;
+            }
+        `;
+        document.head.appendChild(style);
     }
 }
 
@@ -75,46 +102,31 @@ function initCountdown() {
 function initOrderForm() {
     const orderForm = document.getElementById('orderForm');
     if (orderForm) {
-        // Форматирование телефона
-        const phoneInput = document.getElementById('phone');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\\D/g, '');
-                if (value.length > 0) {
-                    if (value[0] === '8') {
-                        value = '7' + value.slice(1);
-                    }
-                    if (value[0] === '7') {
-                        value = value.slice(0, 11);
-                        const formatted = value.replace(/(\\d{1})(\\d{3})(\\d{3})(\\d{2})(\\d{2})/, '+$1 ($2) $3-$4-$5');
-                        e.target.value = formatted;
-                    }
-                }
-            });
-        }
-        
-        // Обработка отправки формы
         orderForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const submitButton = orderForm.querySelector('button[type="submit"]');
-            const originalText = submitButton.innerHTML;
-            
-            // Показываем состояние загрузки
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправляем...';
-            submitButton.disabled = true;
-            
+            // Получаем данные из формы
             const formData = {
                 name: document.getElementById('name').value,
                 phone: document.getElementById('phone').value,
-                city: document.getElementById('city').value || 'Не указан'
+                city: document.getElementById('city')?.value || ''
             };
             
+            // Валидация
+            if (!formData.name || !formData.phone) {
+                showNotification('Пожалуйста, заполните обязательные поля', 'error');
+                return;
+            }
+            
+            // Показываем уведомление о начале обработки
+            showNotification('Отправка заказа...', 'info');
+            
             try {
+                // Отправляем данные на сервер
                 const response = await fetch('/api/telegram', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(formData)
                 });
@@ -122,90 +134,139 @@ function initOrderForm() {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Успех - редирект на страницу благодарности
-                    window.location.href = '/thank-you?name=' + encodeURIComponent(formData.name);
+                    // Успешно отправлено
+                    showNotification('Заказ успешно отправлен! Мы свяжемся с вами в ближайшее время.', 'success');
+                    orderForm.reset();
+                    
+                    // Перенаправляем на страницу благодарности через 2 секунды
+                    setTimeout(() => {
+                        window.location.href = '/thank-you.html';
+                    }, 2000);
                 } else {
-                    throw new Error(result.error || 'Ошибка отправки');
+                    // Ошибка отправки
+                    showNotification(`Ошибка при отправке: ${result.error || 'Попробуйте позже'}`, 'error');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showNotification('Произошла ошибка при отправке заявки. Попробуйте еще раз.', 'error');
-                
-                // Восстанавливаем состояние кнопки
-                submitButton.innerHTML = originalText;
-                submitButton.disabled = false;
+                console.error('Error submitting form:', error);
+                showNotification('Произошла ошибка при отправке формы. Пожалуйста, попробуйте позже.', 'error');
             }
         });
+        
+        // Маска для телефона
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0 && value[0] !== '7') {
+                    value = '7' + value;
+                }
+                
+                let formattedValue = '';
+                if (value.length > 0) {
+                    formattedValue += '+' + value.substring(0, 1);
+                }
+                if (value.length > 1) {
+                    formattedValue += ' (' + value.substring(1, 4);
+                }
+                if (value.length > 4) {
+                    formattedValue += ') ' + value.substring(4, 7);
+                }
+                if (value.length > 7) {
+                    formattedValue += '-' + value.substring(7, 9);
+                }
+                if (value.length > 9) {
+                    formattedValue += '-' + value.substring(9, 11);
+                }
+                
+                e.target.value = formattedValue;
+            });
+        }
     }
 }
 
-// Инициализация анимаций при скролле
-function initScrollAnimations() {
-    // Анимация элементов при скролле
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-
-    // Наблюдаем за элементами для анимации
-    document.querySelectorAll('.feature-card, .review-card').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'all 0.6s ease';
-        observer.observe(el);
-    });
-}
-
-// Утилиты
+// Показываем уведомление
 function showNotification(message, type = 'info') {
-    // Удаляем существующие уведомления
-    document.querySelectorAll('.notification').forEach(n => n.remove());
+    // Проверяем, существует ли уже контейнер для уведомлений
+    let notificationContainer = document.querySelector('.notification-container');
     
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.className = 'notification-container';
+        document.body.appendChild(notificationContainer);
+        
+        // Добавляем стили для уведомлений
+        if (!document.getElementById('notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                .notification-container {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                }
+                .notification {
+                    padding: 15px 20px;
+                    margin-bottom: 10px;
+                    border-radius: 8px;
+                    color: white;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+                    display: flex;
+                    align-items: center;
+                    max-width: 350px;
+                    opacity: 0;
+                    transform: translateX(50px);
+                    transition: all 0.3s ease;
+                }
+                .notification.show {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                .notification i {
+                    margin-right: 10px;
+                    font-size: 1.2rem;
+                }
+                .notification-info {
+                    background: linear-gradient(135deg, #4a7ef7, #617ef6);
+                }
+                .notification-success {
+                    background: linear-gradient(135deg, #42b883, #3e9e74);
+                }
+                .notification-error {
+                    background: linear-gradient(135deg, #ef4444, #dc2626);
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    // Создаем элемент уведомления
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'error' ? '#FF4444' : type === 'success' ? '#00FF7F' : '#0066FF'};
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 500;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-    `;
+    
+    // Добавляем иконку в зависимости от типа уведомления
+    let icon = 'info-circle';
+    if (type === 'success') icon = 'check-circle';
+    if (type === 'error') icon = 'exclamation-circle';
+    
     notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}-circle"></i>
+        <i class="fas fa-${icon}"></i>
         <span>${message}</span>
     `;
     
-    document.body.appendChild(notification);
+    // Добавляем уведомление в контейнер
+    notificationContainer.appendChild(notification);
     
+    // Добавляем класс для анимации
     setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 100);
+        notification.classList.add('show');
+    }, 10);
     
+    // Удаляем уведомление через 5 секунд
     setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
+        notification.classList.remove('show');
         setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
+            notification.remove();
         }, 300);
-    }, 4000);
+    }, 5000);
 }

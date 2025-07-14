@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Спасибо за заявку! - CleanDrive</title>
-    <link rel="stylesheet" href="modern-styles.css">
+    <link rel="stylesheet" href="modern-styles.css?v=3">
+    <link rel="stylesheet" href="fix-colors.css?v=2">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .thank-you-page {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(160deg, #f0f5ff 0%, #dbe7ff 100%);
             padding: 20px;
         }
         
@@ -21,7 +24,8 @@
             background: white;
             padding: 60px 40px;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(67, 100, 233, 0.08);
+            border: 1px solid rgba(67, 100, 233, 0.1);
             animation: slideIn 0.6s ease-out;
         }
         
@@ -40,12 +44,13 @@
             width: 100px;
             height: 100px;
             margin: 0 auto 30px;
-            background: #4CAF50;
+            background: linear-gradient(135deg, #4a7ef7, #617ef6);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             animation: pulse 2s infinite;
+            box-shadow: 0 10px 25px rgba(74, 126, 247, 0.3);
         }
         
         @keyframes pulse {
@@ -62,27 +67,28 @@
         
         .thank-you-title {
             font-size: 2.5rem;
-            color: #333;
+            color: #1a2236;
             margin-bottom: 20px;
             font-weight: bold;
         }
         
         .thank-you-text {
             font-size: 1.2rem;
-            color: #666;
+            color: #455275;
             line-height: 1.6;
             margin-bottom: 40px;
         }
         
         .contact-info {
-            background: #f8f9fa;
+            background: linear-gradient(160deg, #f0f5ff 0%, #dbe7ff 100%);
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
+            border: 1px solid rgba(67, 100, 233, 0.1);
         }
         
         .contact-info h3 {
-            color: #333;
+            color: #1a2236;
             margin-bottom: 15px;
             font-size: 1.3rem;
         }
@@ -93,41 +99,42 @@
             justify-content: center;
             margin-bottom: 10px;
             font-size: 1.1rem;
-            color: #555;
+            color: #455275;
         }
         
         .contact-item svg {
             width: 20px;
             height: 20px;
             margin-right: 10px;
-            fill: #667eea;
+            fill: #4a7ef7;
         }
         
         .back-button {
             display: inline-block;
             padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a7ef7, #617ef6);
             color: white;
             text-decoration: none;
             border-radius: 10px;
             font-weight: bold;
             transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(74, 126, 247, 0.3);
             font-size: 1.1rem;
         }
         
         .back-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 15px 30px rgba(74, 126, 247, 0.4);
         }
         
         .features-preview {
             margin-top: 40px;
             padding-top: 30px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid rgba(67, 100, 233, 0.1);
         }
         
         .features-preview h4 {
-            color: #333;
+            color: #1a2236;
             margin-bottom: 20px;
             font-size: 1.2rem;
         }
@@ -143,7 +150,7 @@
             display: flex;
             align-items: center;
             padding: 10px;
-            background: #f8f9fa;
+            background: rgba(74, 126, 247, 0.05);
             border-radius: 8px;
         }
         
@@ -151,12 +158,12 @@
             width: 16px;
             height: 16px;
             margin-right: 8px;
-            fill: #4CAF50;
+            fill: #4a7ef7;
         }
         
         .feature-item span {
             font-size: 0.9rem;
-            color: #555;
+            color: #455275;
         }
         
         @media (max-width: 768px) {
